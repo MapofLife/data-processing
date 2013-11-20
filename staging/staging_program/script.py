@@ -83,5 +83,10 @@ def do_all(variable):
         print(f)
 
 import sys
-
-do_all(sys.argv[1])
+if __name__ == '__main__':
+    if len(sys.argv)==2:
+        do_all(sys.argv[1])
+    else:
+        print('Please enter in the format python3 script.py [basic or surfacing] >[savename]')
+else:
+    print('Please enter in the format python3 script.py [basic or surfacing] >[savename]')
