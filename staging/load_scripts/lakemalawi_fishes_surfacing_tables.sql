@@ -1,7 +1,7 @@
 ﻿-- oliver with provider e.g. 'stalmans'
 -- Oliver with provider but capitalized, such as 'Stalmans'
 --  with title e.g. 'Tinleys plant species list for the greater Gorongosa ecosystem'
--- lakemalwai_fishes with dataset id (table name) e.g 'gorongosa_flora'
+-- lakemalawi_fishes with dataset id (table name) e.g 'gorongosa_flora'
 -- %pub_year% with year of publication e.g. '2010' 
 -- http://www.academia.edu/2998172/Checklist_of_the_Cichlid_Fishes_of_Lake_Malawi_Lake_Nyasa_Niassa_ with the full url to the study e.g. http://oo.adu.org.za/content.php?id=4
 -- www.academia.edu with the short url to the study e.g. oo.adu.org.za
@@ -36,9 +36,9 @@ insert into data_registry
 	(dataset_id,table_name,geom_table,provider,taxa,classes,dataset_title,seasonality,auto_tax,type,geom_id,geom_link_id,
 		geometry_field,scientificname,ready,style_table,product_type,presence)
 values (
-	'lakemalwai_fishes', --dataset_id: the name of the species list table (same as table_name) e.g. "myanmar_flora"
-	'lakemalwai_fishes', --table_name: the name of the table that holds the species list. note same as dataset_id
-	'lakemalwai_fishes_geom', --geom_table: the name of the geom table.  should be <table_name>_geom eg "myanmar_flora_geom"	
+	'lakemalawi_fishes', --dataset_id: the name of the species list table (same as table_name) e.g. "myanmar_flora"
+	'lakemalawi_fishes', --table_name: the name of the table that holds the species list. note same as dataset_id
+	'lakemalawi_fishes_geom', --geom_table: the name of the geom table.  should be <table_name>_geom eg "myanmar_flora_geom"	
 	'oliver', --provider: the key to the provider table (column providers.provider) eg "hillers"	
 	'fish', --taxa: the taxonomic group, like "plants", "aves", herps, etc.  should match dashboard_metadata.class	
 	'Fish', -- classes: same as taxa column, but capitalize
@@ -67,13 +67,13 @@ values (
 -- "Type", put'Local Inventory'
 -- Can include other fields if relevant.
 
---delete from feature_metadata where data_table = 'lakemalwai_fishes' and title = 'Species name'
+--delete from feature_metadata where data_table = 'lakemalawi_fishes' and title = 'Species name'
 
 --Species Name field
 insert into feature_metadata
 	(data_table,provider,field,title,"order","type") --order and type are keywords so need to be in quotes
 values (
-	'lakemalwai_fishes', --data_table - the name of the species list table. should match data_registry.table_name
+	'lakemalawi_fishes', --data_table - the name of the species list table. should match data_registry.table_name
 	'oliver', --provider - the id of the provider.  should match providers.provider
 
 	-- do not change fields below this line
@@ -83,28 +83,28 @@ values (
 	'geochecklist' --type - always 'geochecklist'
 )
 
--- delete from feature_metadata where data_table = 'lakemalwai_fishes' and title = 'Source'
+-- delete from feature_metadata where data_table = 'lakemalawi_fishes' and title = 'Source'
 -- Source field
 insert into feature_metadata
 	(data_table,provider,field,title,"order","type") --order and type are keywords so need to be in quotes
 values (
-	'lakemalwai_fishes', --data_table - the name of the species list table. should match data_registry.table_name
+	'lakemalawi_fishes', --data_table - the name of the species list table. should match data_registry.table_name
 	'oliver', --provider - the id of the provider.  should match providers.provider
-	'''''', --field - the name of the field to be displayed from the data_table
+	'''Checklist of the Cichlid Fishes of Lake Malawi (Lake Nyasa/Niassa)''', --field - the name of the field to be displayed from the data_table
 		
 	-- do not change fields below this line
 	'Source', -- title - the display name of the field
 	2, --order - how to order the fields from the data_table
 	'geochecklist' --type - always 'geochecklist'
 )
--- delete from feature_metadata where data_table = 'lakemalwai_fishes' and title = 'Provider'
+-- delete from feature_metadata where data_table = 'lakemalawi_fishes' and title = 'Provider'
 -- Provider field
 insert into feature_metadata
 	(data_table,provider,field,title,"order","type") --order and type are keywords so need to be in quotes
 values (
-	'lakemalwai_fishes', --data_table - the name of the species list table. should match data_registry.table_name
+	'lakemalawi_fishes', --data_table - the name of the species list table. should match data_registry.table_name
 	'oliver', --provider - the id of the provider.  should match providers.provider
-	'''Oliver, %pub_year%''', --field - the name of the field to be displayed from the data_table
+	'''Oliver, 2013''', --field - the name of the field to be displayed from the data_table
 		
 	-- do not change fields below this line
 	'Provider', -- title - the display name of the field
@@ -112,12 +112,12 @@ values (
 	'geochecklist' --type - always 'geochecklist'
 )
 
--- delete from feature_metadata where data_table = 'lakemalwai_fishes' and title = 'URL'
+-- delete from feature_metadata where data_table = 'lakemalawi_fishes' and title = 'URL'
 -- URL field
 insert into feature_metadata
 	(data_table,provider,field,title,"order","type") --order and type are keywords so need to be in quotes
 values (
-	'lakemalwai_fishes', --data_table - the name of the species list table. should match data_registry.table_name
+	'lakemalawi_fishes', --data_table - the name of the species list table. should match data_registry.table_name
 	'oliver', --provider - the id of the provider.  should match providers.provider
 	'''<a target=''''_blank'''' onclick=''''window.open(this.href)'''' href=''''http://www.academia.edu/2998172/Checklist_of_the_Cichlid_Fishes_of_Lake_Malawi_Lake_Nyasa_Niassa_''''>www.academia.edu</a>''', --field - the name of the field to be displayed from the data_table
 		
@@ -127,13 +127,13 @@ values (
 	'geochecklist' --type - always 'geochecklist'
 )
 
--- delete from feature_metadata where data_table = 'lakemalwai_fishes' and title = 'Type'
+-- delete from feature_metadata where data_table = 'lakemalawi_fishes' and title = 'Type'
 
 -- Type field
 insert into feature_metadata
 	(data_table,provider,field,title,"order","type") --order and type are keywords so need to be in quotes
 values (
-	'lakemalwai_fishes', --data_table - the name of the species list table. should match data_registry.table_name
+	'lakemalawi_fishes', --data_table - the name of the species list table. should match data_registry.table_name
 	'oliver', --provider - the id of the provider.  should match providers.provider
 		
 	-- do not change fields below this line
@@ -144,7 +144,7 @@ values (
 )
 
 -- dashboard_metadata
---delete from dashboard_metadata where dataset_id = 'lakemalwai_fishes'
+--delete from dashboard_metadata where dataset_id = 'lakemalawi_fishes'
 insert into dashboard_metadata
 	("class",provider,contact,coverage,dataset_id,date_more,date_range,description,recommended_citation,
 		seasonality,seasonality_more,spatial_metadata,taxon,taxonomy_metadata,url,"type")
@@ -153,7 +153,7 @@ values (
 	'oliver', --provider
 	'mko@malawicichlids.com', --contact - email address of contact
 	'Lake Malawi', --coverage - the geographic extent eg. "Global" or "Angola" or "New World"
-	'lakemalwai_fishes', --dataset_id - the name of the species list table
+	'lakemalawi_fishes', --dataset_id - the name of the species list table
 	null, --  with null if not applicable
 	'ca. 1999 to 2013', --ca. 1999 to 2013 with a string representation for the date range "ca. 1980 to 2010"
 	null, --description - string description

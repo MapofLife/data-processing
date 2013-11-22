@@ -32,6 +32,7 @@ values (
 	'scilit' --source_type: <wwf | webuser | mol | gbif | iucn | ebird | scilit >
 )
 
+
 insert into data_registry
 	(dataset_id,table_name,geom_table,provider,taxa,classes,dataset_title,seasonality,auto_tax,type,geom_id,geom_link_id,
 		geometry_field,scientificname,ready,style_table,product_type,presence)
@@ -47,14 +48,14 @@ values (
 	true, --auto_tax: short for 'autonomous taxonomy'.  i.e. true if we use the tax in from the dataset, false if we use MOL tax.  usually true
 	
 	-- do not change fields below this line
-	'geochecklist', --type: geochecklist (means we have a spp table and a geometry table)
-	'geom_id', --geom_id: the foreign key in the species list. should be 'geom_id'
-	'cartodb_id', --geom_link_id: the primary key in the geom table.  should be 'cartodb_id'
+	'points', --type: geochecklist (means we have a spp table and a geometry table)
+	null, --geom_id: the foreign key in the species list. should be 'geom_id'
+	null, --geom_link_id: the primary key in the geom table.  should be 'cartodb_id'
 	'the_geom_webmercator', --geometry_field: should be: the_geom_webmercator
 	'scientificname', --scientificname: the column that holds the scientific name (scientifcname)
 	false, --ready: false until dataset is ready to surface
-	'polygons_style', -- style_table: always polygon_style for checklist data
-	'localinv', --product_type: always localinv for checklist data 
+	'points_style', -- style_table: always polygon_style for checklist data
+	'points', --product_type: always localinv for checklist data 
 	1 --presence - always set to 1 for checklist data
 )
 
@@ -80,7 +81,7 @@ values (
 	'scientificname', --field - the name of the field to be displayed from the data_table
 	'Species name', -- title - the display name of the field
 	1, --order - how to order the fields from the data_table
-	'geochecklist' --type - always 'geochecklist'
+	'points' --type - always 'geochecklist'
 )
 
 -- delete from feature_metadata where data_table = 'morocco_east_herps' and title = 'Source'
@@ -95,7 +96,7 @@ values (
 	-- do not change fields below this line
 	'Source', -- title - the display name of the field
 	2, --order - how to order the fields from the data_table
-	'geochecklist' --type - always 'geochecklist'
+	'points' --type - always 'geochecklist'
 )
 -- delete from feature_metadata where data_table = 'morocco_east_herps' and title = 'Provider'
 -- Provider field
@@ -109,7 +110,7 @@ values (
 	-- do not change fields below this line
 	'Provider', -- title - the display name of the field
 	3, --order - how to order the fields from the data_table
-	'geochecklist' --type - always 'geochecklist'
+	'points' --type - always 'geochecklist'
 )
 
 -- delete from feature_metadata where data_table = 'morocco_east_herps' and title = 'URL'
@@ -124,7 +125,7 @@ values (
 	-- do not change fields below this line
 	'URL', -- title - the display name of the field
 	4, --order - how to order the fields from the data_table
-	'geochecklist' --type - always 'geochecklist'
+	'points' --type - always 'geochecklist'
 )
 
 -- delete from feature_metadata where data_table = 'morocco_east_herps' and title = 'Type'
@@ -140,7 +141,7 @@ values (
 	'''Local Inventory''', --field - the name of the field to be displayed from the data_table
 	'Type', -- title - the display name of the field
 	5, --order - how to order the fields from the data_table
-	'geochecklist' --type - always 'geochecklist'
+	'points' --type - always 'geochecklist'
 )
 
 -- dashboard_metadata
@@ -166,5 +167,5 @@ values (
 	'http://www.arievandermeijden.nl/wordpress/wp-content/uploads/2011/08/Barata2011_Herpetological-Bulletin_final.pdf', --url - url of the datasource
 
 	-- do not change fields below this line
-	'localinv' --type - localinv. should match data_registry.product_type	
+	'points' --type - localinv. should match data_registry.product_type	
 )

@@ -1,7 +1,7 @@
---F5 - Execute selection
+﻿--F5 - Execute selection
 --Replace All 
--- quirimbas_plants with the species table name
--- bandeira with provider e.g. 'stalmans'
+-- mozambique_niassa_herps with the species table name
+-- branch with provider e.g. 'stalmans'
 
 ---------------------------
 -- create the species table
@@ -13,16 +13,16 @@
 --example: golarainforest_herps
 
 --create the column that will link from the geom table (primary key) to species list (foreign key)
-alter table quirimbas_plants
+alter table mozambique_niassa_herps
 add column geom_id integer;
 
 -- create an index on the geom id <tablename>_<colname>_btree
-drop index if exists quirimbas_plants_geom_id_btree;
-create index quirimbas_plants_geom_id_btree ON quirimbas_plants (geom_id);
+drop index if exists mozambique_niassa_herps_geom_id_btree;
+create index mozambique_niassa_herps_geom_id_btree ON mozambique_niassa_herps (geom_id);
 
 --create an index on the scientific name  <tablename>_scientificname_btree
-drop index if exists quirimbas_plants_scientificname_btree;
-create index quirimbas_plants_scientificname_btree ON quirimbas_plants (scientificname);
+drop index if exists mozambique_niassa_herps_scientificname_btree;
+create index mozambique_niassa_herps_scientificname_btree ON mozambique_niassa_herps (scientificname);
 
 -------------------------------------------------------------------------
 -- fix data if required - better to do in excel and re-upload if possible
@@ -43,7 +43,7 @@ create index quirimbas_plants_scientificname_btree ON quirimbas_plants (scientif
 
 select new_new_name as geom_name, the_geom
 from wdpa2010
-where new_new_name = 'Quirimbas'
+where new_new_name = 'Niassa'
 
 
 --3. used a supplied shapfile
@@ -51,7 +51,7 @@ where new_new_name = 'Quirimbas'
 -- create the geom table use "create table from query" button in cartodb
 -- merge multiple records into a single record
 select geom_name as geom_name, st_multi(st_union(the_geom)) as the_geom
-from quirimbas_plants_shapefile
+from mozambique_niassa_herps_shapefile
 group by geom_name;
 
 -------------------------------------------
@@ -62,8 +62,8 @@ group by geom_name;
 -- this query should come back empty
 -- not needed if there is only one geometry to link to
 SELECT  m.dist
-FROM    quirimbas_plants m 
-LEFT JOIN quirimbas_plants_geom g
+FROM    mozambique_niassa_herps m 
+LEFT JOIN mozambique_niassa_herps_geom g
 ON      g.geom_name = m.dist
 WHERE   g.geom_name IS NULL
 group by m.dist
@@ -71,17 +71,17 @@ group by m.dist
 -- could check the other way - are the rows in the geometry table that aren't in species table?
 
 --add in all of the id's from the geometry table.
-update quirimbas_plants m
+update mozambique_niassa_herps m
 set geom_id = g.cartodb_id
-from quirimbas_plants_geom g
+from mozambique_niassa_herps_geom g
 where m.dist = g.geom_name
 
 -- if there is only one geometry, set geom_id to the appropriate cartodb id
-update quirimbas_plants m
+update mozambique_niassa_herps m
 set geom_id = 1
 
 --set to not null.  extra check to make sure all rows matched.
-alter table quirimbas_plants
+alter table mozambique_niassa_herps
 alter column geom_id set not null;
 
 -- make species list and geom table public in cartodb
@@ -97,18 +97,18 @@ alter column geom_id set not null;
 -----------------------
 
 -- test in cartodb, get_tile should map te specis
-SELECT * FROM get_tile('bandeira', 'localinv', 'Terminalia stenostachya','quirimbas_plants')
+SELECT * FROM get_tile('branch', 'localinv', 'Agama armata','mozambique_niassa_herps')
 
 -- sql to if get_tile does not work.
-SELECT * from data_registry WHERE provider = 'bandeira' and type = 'localinv' or table_name = 'quirimbas_plants'
+SELECT * from data_registry WHERE provider = 'branch' and type = 'localinv' or table_name = 'mozambique_niassa_herps'
 
 SELECT d.*,g.*
-  FROM quirimbas_plants d
-  JOIN quirimbas_plants_geom g ON 
+  FROM mozambique_niassa_herps d
+  JOIN mozambique_niassa_herps_geom g ON 
   d.geom_id = g.cartodb_id
-  where d.scientificname = 'Terminalia stenostachya';
+  where d.scientificname = 'Azolla nilotica';
 
-select * from quirimbas_plants where scientificname = 'Terminalia stenostachya';	
+select * from mozambique_niassa_herps where scientificname = 'Agama armata';	
 	  
 			  
 -------------------------------------------
@@ -116,34 +116,34 @@ select * from quirimbas_plants where scientificname = 'Terminalia stenostachya';
 -------------------------------------------
 
 insert into layer_metadata_staging
-	select * from get_mol_layers('quirimbas_plants');
+	select * from get_mol_layers('mozambique_niassa_herps');
 	
 ---------------------------------
 -- populate the ac_staging table
 ---------------------------------
 
 --sanity check: both queries should have the same number of rows
-select distinct scientificname from quirimbas_plants
+select distinct scientificname from mozambique_niassa_herps
 
 select distinct m.scientificname as n,
 	t.common_names_eng as v
-from quirimbas_plants m left join taxonomy t 
+from mozambique_niassa_herps m left join taxonomy t 
 on m.scientificname = t.scientificname
 
 -- insert the rows
 insert into ac_staging
 	select distinct m.scientificname as n,
 		t.common_names_eng as v
-	from quirimbas_plants m left join taxonomy t 
+	from mozambique_niassa_herps m left join taxonomy t 
 	on m.scientificname = t.scientificname
 
 ---------------------------------
 -- dataset stats
 ---------------------------------
 
---num species: 537
+--num species: 57
 --num geometries: 1
 
 --species to test:
---Terminalia stenostachya
+--Agama armata
 

@@ -1,7 +1,7 @@
---F5 - Execute selection
+﻿--F5 - Execute selection
 --Replace All 
--- banhine_herps with the species table name
--- pietersen with provider e.g. 'stalmans'
+-- dinder_birds with the species table name
+-- el_hussien with provider e.g. 'stalmans'
 
 ---------------------------
 -- create the species table
@@ -13,16 +13,16 @@
 --example: golarainforest_herps
 
 --create the column that will link from the geom table (primary key) to species list (foreign key)
-alter table banhine_herps
+alter table dinder_birds
 add column geom_id integer;
 
 -- create an index on the geom id <tablename>_<colname>_btree
-drop index if exists banhine_herps_geom_id_btree;
-create index banhine_herps_geom_id_btree ON banhine_herps (geom_id);
+drop index if exists dinder_birds_geom_id_btree;
+create index dinder_birds_geom_id_btree ON dinder_birds (geom_id);
 
 --create an index on the scientific name  <tablename>_scientificname_btree
-drop index if exists banhine_herps_scientificname_btree;
-create index banhine_herps_scientificname_btree ON banhine_herps (scientificname);
+drop index if exists dinder_birds_scientificname_btree;
+create index dinder_birds_scientificname_btree ON dinder_birds (scientificname);
 
 -------------------------------------------------------------------------
 -- fix data if required - better to do in excel and re-upload if possible
@@ -43,7 +43,7 @@ create index banhine_herps_scientificname_btree ON banhine_herps (scientificname
 
 select new_new_name as geom_name, the_geom
 from wdpa2010
-where new_new_name = 'Banhine'
+where new_new_name = 'Dinder'
 
 
 --3. used a supplied shapfile
@@ -51,7 +51,7 @@ where new_new_name = 'Banhine'
 -- create the geom table use "create table from query" button in cartodb
 -- merge multiple records into a single record
 select geom_name as geom_name, st_multi(st_union(the_geom)) as the_geom
-from banhine_herps_shapefile
+from dinder_birds_shapefile
 group by geom_name;
 
 -------------------------------------------
@@ -62,8 +62,8 @@ group by geom_name;
 -- this query should come back empty
 -- not needed if there is only one geometry to link to
 SELECT  m.dist
-FROM    banhine_herps m 
-LEFT JOIN banhine_herps_geom g
+FROM    dinder_birds m 
+LEFT JOIN dinder_birds_geom g
 ON      g.geom_name = m.dist
 WHERE   g.geom_name IS NULL
 group by m.dist
@@ -71,17 +71,17 @@ group by m.dist
 -- could check the other way - are the rows in the geometry table that aren't in species table?
 
 --add in all of the id's from the geometry table.
-update banhine_herps m
+update dinder_birds m
 set geom_id = g.cartodb_id
-from banhine_herps_geom g
+from dinder_birds_geom g
 where m.dist = g.geom_name
 
 -- if there is only one geometry, set geom_id to the appropriate cartodb id
-update banhine_herps m
+update dinder_birds m
 set geom_id = 1
 
 --set to not null.  extra check to make sure all rows matched.
-alter table banhine_herps
+alter table dinder_birds
 alter column geom_id set not null;
 
 -- make species list and geom table public in cartodb
@@ -97,18 +97,18 @@ alter column geom_id set not null;
 -----------------------
 
 -- test in cartodb, get_tile should map te specis
-SELECT * FROM get_tile('pietersen', 'localinv', 'Python natalensis','banhine_herps')
+SELECT * FROM get_tile('el_hussien', 'localinv', 'Platalea alba','dinder_birds')
 
 -- sql to if get_tile does not work.
-SELECT * from data_registry WHERE provider = 'pietersen' and type = 'localinv' or table_name = 'banhine_herps'
+SELECT * from data_registry WHERE provider = 'el_hussien' and type = 'localinv' or table_name = 'dinder_birds'
 
 SELECT d.*,g.*
-  FROM banhine_herps d
-  JOIN banhine_herps_geom g ON 
+  FROM dinder_birds d
+  JOIN dinder_birds_geom g ON 
   d.geom_id = g.cartodb_id
-  where d.scientificname = 'Python natalensis';
+  where d.scientificname = 'Azolla nilotica';
 
-select * from banhine_herps where scientificname = 'Python natalensis';	
+select * from dinder_birds where scientificname = 'Azolla nilotica';	
 	  
 			  
 -------------------------------------------
@@ -116,34 +116,34 @@ select * from banhine_herps where scientificname = 'Python natalensis';
 -------------------------------------------
 
 insert into layer_metadata_staging
-	select * from get_mol_layers('banhine_herps');
+	select * from get_mol_layers('dinder_birds');
 	
 ---------------------------------
 -- populate the ac_staging table
 ---------------------------------
 
 --sanity check: both queries should have the same number of rows
-select distinct scientificname from banhine_herps
+select distinct scientificname from dinder_birds
 
 select distinct m.scientificname as n,
 	t.common_names_eng as v
-from banhine_herps m left join taxonomy t 
+from dinder_birds m left join taxonomy t 
 on m.scientificname = t.scientificname
 
 -- insert the rows
 insert into ac_staging
 	select distinct m.scientificname as n,
 		t.common_names_eng as v
-	from banhine_herps m left join taxonomy t 
+	from dinder_birds m left join taxonomy t 
 	on m.scientificname = t.scientificname
 
 ---------------------------------
 -- dataset stats
 ---------------------------------
 
---num species: 63
+--num species: 56
 --num geometries: 1
 
 --species to test:
---Python natalensis
-
+--Platalea alba (one entry)
+--Alcedo cristata (three entries)

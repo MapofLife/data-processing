@@ -1,4 +1,4 @@
--- el_hussien with provider e.g. 'stalmans'
+﻿-- el_hussien with provider e.g. 'stalmans'
 -- El Hussein with provider but capitalized, such as 'Stalmans'
 -- Abundance and distribution of Birds in Dinder National Park, Sudan with title e.g. 'Tinleys plant species list for the greater Gorongosa ecosystem'
 -- dinder_birds with dataset id (table name) e.g 'gorongosa_flora'
@@ -161,7 +161,7 @@ values (
 	null, -- %seasonality% - null if none
 	null, -- %seasonality_more% - null if none
 	null, -- %spatial_metadata% - what was used for spatial information
-	'%taxon%', -- %taxon% - same as class but with common names "Plants", or "Birds"
+	'Birds', -- %taxon% - same as class but with common names "Plants", or "Birds"
 	'Pomeroy, 1992', --taxonomy_metadata: references for the taxonomy
 	'http://www.pakwildlife.org/wp-content/uploads/Issue-2-Article-6.pdf', --url - url of the datasource
 

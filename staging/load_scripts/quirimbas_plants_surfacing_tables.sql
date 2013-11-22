@@ -1,4 +1,4 @@
--- bandeira with provider e.g. 'stalmans'
+﻿-- bandeira with provider e.g. 'stalmans'
 -- Bandeira with provider but capitalized, such as 'Stalmans'
 -- Terrestrial Vegetation Assessment of the Quirimbas National Park with title e.g. 'Tinleys plant species list for the greater Gorongosa ecosystem'
 -- quirimbas_plants with dataset id (table name) e.g 'gorongosa_flora'

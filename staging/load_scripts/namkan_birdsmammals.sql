@@ -1,7 +1,7 @@
 ﻿--F5 - Execute selection
 --Replace All 
---  with the species table name
--- tawiri with provider e.g. 'stalmans'
+-- namkan_birdsmammals with the species table name
+-- timmins with provider e.g. 'stalmans'
 
 ---------------------------
 -- create the species table
@@ -13,16 +13,16 @@
 --example: golarainforest_herps
 
 --create the column that will link from the geom table (primary key) to species list (foreign key)
-alter table 
+alter table namkan_birdsmammals
 add column geom_id integer;
 
 -- create an index on the geom id <tablename>_<colname>_btree
-drop index if exists _geom_id_btree;
-create index snwc_mammals_geom_id_btree ON  (geom_id);
+drop index if exists namkan_birdsmammals_geom_id_btree;
+create index namkan_birdsmammals_geom_id_btree ON namkan_birdsmammals (geom_id);
 
 --create an index on the scientific name  <tablename>_scientificname_btree
-drop index if exists _scientificname_btree;
-create index snwc_mammals_scientificname_btree ON  (scientificname);
+drop index if exists namkan_birdsmammals_scientificname_btree;
+create index namkan_birdsmammals_scientificname_btree ON namkan_birdsmammals (scientificname);
 
 -------------------------------------------------------------------------
 -- fix data if required - better to do in excel and re-upload if possible
@@ -43,7 +43,7 @@ create index snwc_mammals_scientificname_btree ON  (scientificname);
 
 select new_new_name as geom_name, the_geom
 from wdpa2010
-where new_new_name = 'Banhine'
+where new_new_name = 'Nam Kan'
 
 
 --3. used a supplied shapfile
@@ -51,7 +51,7 @@ where new_new_name = 'Banhine'
 -- create the geom table use "create table from query" button in cartodb
 -- merge multiple records into a single record
 select geom_name as geom_name, st_multi(st_union(the_geom)) as the_geom
-from snwc_shapefile
+from namkan_birdsmammals_shapefile
 group by geom_name;
 
 -------------------------------------------
@@ -62,8 +62,8 @@ group by geom_name;
 -- this query should come back empty
 -- not needed if there is only one geometry to link to
 SELECT  m.dist
-FROM     m 
-LEFT JOIN _geom g
+FROM    namkan_birdsmammals m 
+LEFT JOIN namkan_birdsmammals_geom g
 ON      g.geom_name = m.dist
 WHERE   g.geom_name IS NULL
 group by m.dist
@@ -71,17 +71,17 @@ group by m.dist
 -- could check the other way - are the rows in the geometry table that aren't in species table?
 
 --add in all of the id's from the geometry table.
-update  m
+update namkan_birdsmammals m
 set geom_id = g.cartodb_id
-from _geom g
+from namkan_birdsmammals_geom g
 where m.dist = g.geom_name
 
 -- if there is only one geometry, set geom_id to the appropriate cartodb id
-update  m
+update namkan_birdsmammals m
 set geom_id = 1
 
 --set to not null.  extra check to make sure all rows matched.
-alter table 
+alter table namkan_birdsmammals
 alter column geom_id set not null;
 
 -- make species list and geom table public in cartodb
@@ -97,18 +97,18 @@ alter column geom_id set not null;
 -----------------------
 
 -- test in cartodb, get_tile should map te specis
-SELECT * FROM get_tile('tawiri', 'localinv', 'Peliperdix coqui','snwc_mammals')
+SELECT * FROM get_tile('timmins', 'localinv', 'Motacilla cinerea','namkan_birdsmammals')
 
 -- sql to if get_tile does not work.
-SELECT * from data_registry WHERE provider = 'tawiri' and type = 'localinv' or table_name = 'snwc_mammals'
+SELECT * from data_registry WHERE provider = 'timmins' and type = 'localinv' or table_name = 'namkan_birdsmammals'
 
 SELECT d.*,g.*
-  FROM  d
-  JOIN _geom g ON
+  FROM namkan_birdsmammals d
+  JOIN namkan_birdsmammals_geom g ON 
   d.geom_id = g.cartodb_id
   where d.scientificname = 'Azolla nilotica';
 
-select * from  where scientificname = 'Azolla nilotica';	
+select * from namkan_birdsmammals where scientificname = 'Azolla nilotica';	
 	  
 			  
 -------------------------------------------
@@ -116,35 +116,33 @@ select * from  where scientificname = 'Azolla nilotica';
 -------------------------------------------
 
 insert into layer_metadata_staging
-	select * from get_mol_layers('snwc_mammals');
+	select * from get_mol_layers('namkan_birdsmammals');
 	
 ---------------------------------
 -- populate the ac_staging table
 ---------------------------------
 
 --sanity check: both queries should have the same number of rows
-select distinct scientificname from snwc_mammals
+select distinct scientificname from namkan_birdsmammals
 
 select distinct m.scientificname as n,
 	t.common_names_eng as v
-from snwc_mammals m left join taxonomy t 
+from namkan_birdsmammals m left join taxonomy t 
 on m.scientificname = t.scientificname
 
 -- insert the rows
 insert into ac_staging
 	select distinct m.scientificname as n,
 		t.common_names_eng as v
-	from snwc_mammals m left join taxonomy t 
+	from namkan_birdsmammals m left join taxonomy t 
 	on m.scientificname = t.scientificname
 
 ---------------------------------
 -- dataset stats
 ---------------------------------
 
---num species: 306
+--num species: 270
 --num geometries: 1
 
 --species to test:
---Peliperdix coqui
-
-
+--Motacilla cinerea

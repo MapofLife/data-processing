@@ -78,7 +78,7 @@ values (
 	-- do not change fields below this line
 	'scientificname', --field - the name of the field to be displayed from the data_table
 	'Species name', -- title - the display name of the field
-	1, --order - how to order the fields from the data_table
+	1 --order - how to order the fields from the data_table
 )
 
 -- delete from feature_metadata where data_table = '%dataset_id%' and title = 'Source'
@@ -91,7 +91,7 @@ values (
 		
 	-- do not change fields below this line
 	'Source', -- title - the display name of the field
-	2, --order - how to order the fields from the data_table
+	2 --order - how to order the fields from the data_table
 )
 -- delete from feature_metadata where data_table = '%dataset_id%' and title = 'Provider'
 -- Provider field
@@ -103,7 +103,7 @@ values (
 		
 	-- do not change fields below this line
 	'Provider', -- title - the display name of the field
-	3, --order - how to order the fields from the data_table
+	3 --order - how to order the fields from the data_table
 )
 
 -- delete from feature_metadata where data_table = '%dataset_id%' and title = 'URL'
@@ -116,7 +116,7 @@ values (
 		
 	-- do not change fields below this line
 	'URL', -- title - the display name of the field
-	4, --order - how to order the fields from the data_table
+	4 --order - how to order the fields from the data_table
 )
 
 -- dashboard_metadata

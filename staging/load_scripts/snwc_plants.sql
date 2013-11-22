@@ -1,7 +1,7 @@
 ﻿--F5 - Execute selection
 --Replace All 
--- lakemalwai_fishes with the species table name
--- oliver with provider e.g. 'stalmans'
+-- snwc_plants with the species table name
+-- bloesch with provider e.g. 'stalmans'
 
 ---------------------------
 -- create the species table
@@ -13,16 +13,16 @@
 --example: golarainforest_herps
 
 --create the column that will link from the geom table (primary key) to species list (foreign key)
-alter table lakemalwai_fishes
+alter table snwc_plants
 add column geom_id integer;
 
 -- create an index on the geom id <tablename>_<colname>_btree
-drop index if exists lakemalwai_fishes_geom_id_btree;
-create index lakemalwai_fishes_geom_id_btree ON lakemalwai_fishes (geom_id);
+drop index if exists snwc_plants_geom_id_btree;
+create index snwc_plants_geom_id_btree ON snwc_plants (geom_id);
 
 --create an index on the scientific name  <tablename>_scientificname_btree
-drop index if exists lakemalwai_fishes_scientificname_btree;
-create index lakemalwai_fishes_scientificname_btree ON lakemalwai_fishes (scientificname);
+drop index if exists snwc_plants_scientificname_btree;
+create index snwc_plants_scientificname_btree ON snwc_plants (scientificname);
 
 -------------------------------------------------------------------------
 -- fix data if required - better to do in excel and re-upload if possible
@@ -50,9 +50,8 @@ where new_new_name = 'Banhine'
 
 -- create the geom table use "create table from query" button in cartodb
 -- merge multiple records into a single record
-select geom_name as geom_name, st_multi(st_union(the_geom)) as the_geom
-from lakemalwai_fishes_shapefile
-group by geom_name;
+select the_geom
+from snwc_shapefile
 
 -------------------------------------------
 -- link the species table to the geom table
@@ -62,8 +61,8 @@ group by geom_name;
 -- this query should come back empty
 -- not needed if there is only one geometry to link to
 SELECT  m.dist
-FROM    lakemalwai_fishes m 
-LEFT JOIN lakemalwai_fishes_geom g
+FROM    snwc_plants m 
+LEFT JOIN snwc_plants_geom g
 ON      g.geom_name = m.dist
 WHERE   g.geom_name IS NULL
 group by m.dist
@@ -71,17 +70,17 @@ group by m.dist
 -- could check the other way - are the rows in the geometry table that aren't in species table?
 
 --add in all of the id's from the geometry table.
-update lakemalwai_fishes m
+update snwc_plants m
 set geom_id = g.cartodb_id
-from lakemalwai_fishes_geom g
+from snwc_plants_geom g
 where m.dist = g.geom_name
 
 -- if there is only one geometry, set geom_id to the appropriate cartodb id
-update lakemalwai_fishes m
+update snwc_plants m
 set geom_id = 1
 
 --set to not null.  extra check to make sure all rows matched.
-alter table lakemalwai_fishes
+alter table snwc_plants
 alter column geom_id set not null;
 
 -- make species list and geom table public in cartodb
@@ -97,18 +96,18 @@ alter column geom_id set not null;
 -----------------------
 
 -- test in cartodb, get_tile should map te specis
-SELECT * FROM get_tile('oliver', 'localinv', 'Peliperdix coqui','lakemalwai_fishes')
+SELECT * FROM get_tile('bloesch', 'localinv', 'Pellaea doniana','snwc_plants')
 
 -- sql to if get_tile does not work.
-SELECT * from data_registry WHERE provider = 'oliver' and type = 'localinv' or table_name = 'lakemalwai_fishes'
+SELECT * from data_registry WHERE provider = 'bloesch' and type = 'localinv' or table_name = 'snwc_plants'
 
 SELECT d.*,g.*
-  FROM lakemalwai_fishes d
-  JOIN lakemalwai_fishes_geom g ON 
+  FROM snwc_plants d
+  JOIN snwc_plants_geom g ON 
   d.geom_id = g.cartodb_id
   where d.scientificname = 'Azolla nilotica';
 
-select * from lakemalwai_fishes where scientificname = 'Azolla nilotica';	
+select * from snwc_plants where scientificname = 'Azolla nilotica';	
 	  
 			  
 -------------------------------------------
@@ -116,35 +115,35 @@ select * from lakemalwai_fishes where scientificname = 'Azolla nilotica';
 -------------------------------------------
 
 insert into layer_metadata_staging
-	select * from get_mol_layers('lakemalwai_fishes');
+	select * from get_mol_layers('snwc_plants');
 	
 ---------------------------------
 -- populate the ac_staging table
 ---------------------------------
 
 --sanity check: both queries should have the same number of rows
-select distinct scientificname from lakemalwai_fishes
+select distinct scientificname from snwc_plants
 
 select distinct m.scientificname as n,
 	t.common_names_eng as v
-from lakemalwai_fishes m left join taxonomy t 
+from snwc_plants m left join taxonomy t 
 on m.scientificname = t.scientificname
 
 -- insert the rows
 insert into ac_staging
 	select distinct m.scientificname as n,
 		t.common_names_eng as v
-	from lakemalwai_fishes m left join taxonomy t 
+	from snwc_plants m left join taxonomy t 
 	on m.scientificname = t.scientificname
 
 ---------------------------------
 -- dataset stats
 ---------------------------------
 
---num species: 306
+--num species: 359
 --num geometries: 1
 
 --species to test:
---Peliperdix coqui
+--Pellaea doniana
 
 
