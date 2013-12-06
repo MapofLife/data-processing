@@ -1,7 +1,7 @@
 ﻿--F5 - Execute selection
 --Replace All 
--- snwc_mammals with the species table name
--- tawiri with provider e.g. 'stalmans'
+-- lormagolagrebo_mammals with the species table name
+-- hoke with provider e.g. 'stalmans'
 
 ---------------------------
 -- create the species table
@@ -13,16 +13,16 @@
 --example: golarainforest_herps
 
 --create the column that will link from the geom table (primary key) to species list (foreign key)
-alter table snwc_mammals
+alter table lormagolagrebo_mammals
 add column geom_id integer;
 
 -- create an index on the geom id <tablename>_<colname>_btree
-drop index if exists snwc_geom_id_btree;
-create index snwc_geom_id_btree ON snwc_mammals (geom_id);
+drop index if exists lormagolagrebo_mammals_geom_id_btree;
+create index lormagolagrebo_mammals_geom_id_btree ON lormagolagrebo_mammals (geom_id);
 
 --create an index on the scientific name  <tablename>_scientificname_btree
-drop index if exists snwc_mammals_scientificname_btree;
-create index snwc_mammals_scientificname_btree ON snwc_mammals (scientificname);
+drop index if exists lormagolagrebo_mammals_scientificname_btree;
+create index lormagolagrebo_mammals_scientificname_btree ON lormagolagrebo_mammals (scientificname);
 
 -------------------------------------------------------------------------
 -- fix data if required - better to do in excel and re-upload if possible
@@ -51,7 +51,7 @@ where new_new_name = 'Banhine'
 -- create the geom table use "create table from query" button in cartodb
 -- merge multiple records into a single record
 select geom_name as geom_name, st_multi(st_union(the_geom)) as the_geom
-from snwc_mammals_shapefile
+from lormagolagrebo_mammals_shapefile
 group by geom_name;
 
 -------------------------------------------
@@ -62,8 +62,8 @@ group by geom_name;
 -- this query should come back empty
 -- not needed if there is only one geometry to link to
 SELECT  m.dist
-FROM    snwc_mammals m 
-LEFT JOIN snwc_geom g
+FROM    lormagolagrebo_mammals m 
+LEFT JOIN lormagolagrebo_geom g
 ON      g.geom_name = m.dist
 WHERE   g.geom_name IS NULL
 group by m.dist
@@ -71,17 +71,17 @@ group by m.dist
 -- could check the other way - are the rows in the geometry table that aren't in species table?
 
 --add in all of the id's from the geometry table.
-update snwc_mammals m
+update lormagolagrebo_mammals m
 set geom_id = g.cartodb_id
-from snwc_geom g
+from lormagolagrebo_geom g
 where m.dist = g.geom_name
 
 -- if there is only one geometry, set geom_id to the appropriate cartodb id
-update snwc_mammals m
+update lormagolagrebo_mammals m
 set geom_id = 1
 
 --set to not null.  extra check to make sure all rows matched.
-alter table snwc_mammals
+alter table lormagolagrebo_mammals
 alter column geom_id set not null;
 
 -- make species list and geom table public in cartodb
@@ -97,18 +97,18 @@ alter column geom_id set not null;
 -----------------------
 
 -- test in cartodb, get_tile should map te specis
-SELECT * FROM get_tile('tawiri', 'localinv', 'Hippotragus niger','snwc_mammals')
+SELECT * FROM get_tile('hoke', 'localinv', 'Panthera pardus','lormagolagrebo_mammals')
 
 -- sql to if get_tile does not work.
-SELECT * from data_registry WHERE provider = 'tawiri' and type = 'localinv' or table_name = 'snwc_mammals'
+SELECT * from data_registry WHERE provider = 'hoke' and type = 'localinv' or table_name = 'lormagolagrebo_mammals'
 
 SELECT d.*,g.*
-  FROM snwc_mammals d
-  JOIN snwc_geom g ON 
+  FROM lormagolagrebo_mammals d
+  JOIN lormagolagrebo_geom g ON 
   d.geom_id = g.cartodb_id
   where d.scientificname = 'Azolla nilotica';
 
-select * from snwc_mammals where scientificname = 'Azolla nilotica';	
+select * from lormagolagrebo_mammals where scientificname = 'Azolla nilotica';	
 	  
 			  
 -------------------------------------------
@@ -116,35 +116,36 @@ select * from snwc_mammals where scientificname = 'Azolla nilotica';
 -------------------------------------------
 
 insert into layer_metadata_staging
-	select * from get_mol_layers('snwc_mammals');
+	select * from get_mol_layers('lormagolagrebo_mammals');
 	
 ---------------------------------
 -- populate the ac_staging table
 ---------------------------------
 
 --sanity check: both queries should have the same number of rows
-select distinct scientificname from snwc_mammals
+select distinct scientificname from lormagolagrebo_mammals
 
 select distinct m.scientificname as n,
 	t.common_names_eng as v
-from snwc_mammals m left join taxonomy t 
+from lormagolagrebo_mammals m left join taxonomy t 
 on m.scientificname = t.scientificname
 
 -- insert the rows
 insert into ac_staging
 	select distinct m.scientificname as n,
 		t.common_names_eng as v
-	from snwc_mammals m left join taxonomy t 
+	from lormagolagrebo_mammals m left join taxonomy t 
 	on m.scientificname = t.scientificname
 
 ---------------------------------
 -- dataset stats
 ---------------------------------
 
---num species: 15
---num geometries: 1
+--num species: 29
+--num geometries: 3
 
 --species to test:
---Hippotragus niger
+--Panthera pardus (1 geom)
+--Herpestes sanguinea (3 geom)
 
 

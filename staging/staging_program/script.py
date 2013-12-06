@@ -1,6 +1,8 @@
 from preprocess import *
 from process import *
 import re
+import sys
+import os
 
 #make '' into none
 def empty_to_None(array):
@@ -66,16 +68,16 @@ def make_basic_tables(fielddict,templatename):
         basic_tables=basic_tables_tmp.replace("\t'', --","\tnull, --")
     return basic_tables
 
-def do_all(variable):
+def do_all(variable,filename):
     if variable=='surfacing':
-        a=getcsv_array_commas('test.csv')
+        a=getcsv_array_commas(filename)
         b=get_column(a,2)
         c=empty_to_None(b)
         d=makedict(c)
         e=make_surfacing_tables(d,'template_surfacing_tables.sql')
         print(e)
     elif variable=='basic':
-        a=getcsv_array_commas('test.csv')
+        a=getcsv_array_commas(filename)
         b=get_column(a,2)
         c=empty_to_None(b)
         d=makedict(c)
@@ -84,9 +86,9 @@ def do_all(variable):
 
 import sys
 if __name__ == '__main__':
-    if len(sys.argv)==2:
-        do_all(sys.argv[1])
+    if len(sys.argv)==3:
+        do_all(sys.argv[2], sys.argv[1])
     else:
-        print('Please enter in the format python3 script.py [basic or surfacing] >[savename]')
+        print('Please enter in the format python3 script.py [filename] [basic or surfacing] >[savename]')
 else:
-    print('Please enter in the format python3 script.py [basic or surfacing] >[savename]')
+    print('Please enter in the format python3 script.py [filename] [basic or surfacing] >[savename]')
