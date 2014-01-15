@@ -64,8 +64,8 @@ group by geom_name;
 SELECT  m.dist
 FROM    italianislands_mammals m 
 LEFT JOIN italianislands_mammals_geom g
-ON      g.geom_name = m.dist
-WHERE   g.geom_name IS NULL
+ON      g.oid_ = m.oid_
+WHERE   g.the_geom IS NULL
 group by m.dist
 
 -- could check the other way - are the rows in the geometry table that aren't in species table?
@@ -74,7 +74,7 @@ group by m.dist
 update italianislands_mammals m
 set geom_id = g.cartodb_id
 from italianislands_mammals_geom g
-where m.dist = g.geom_name
+where m.oid_ = g.oid_
 
 -- if there is only one geometry, set geom_id to the appropriate cartodb id
 update italianislands_mammals m
@@ -97,7 +97,7 @@ alter column geom_id set not null;
 -----------------------
 
 -- test in cartodb, get_tile should map te specis
-SELECT * FROM get_tile('angelici', 'localinv', 'Peliperdix coqui','italianislands_mammals')
+SELECT * FROM get_tile('angelici', 'localinv', 'Crocidura sicula','italianislands_mammals')
 
 -- sql to if get_tile does not work.
 SELECT * from data_registry WHERE provider = 'angelici' and type = 'localinv' or table_name = 'italianislands_mammals'
@@ -141,10 +141,10 @@ insert into ac_staging
 -- dataset stats
 ---------------------------------
 
---num species: 306
---num geometries: 1
+--num species: 37
+--num geometries: 49
 
 --species to test:
---Peliperdix coqui
+--Crocidura sicula
 
 
