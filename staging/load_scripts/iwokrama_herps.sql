@@ -141,10 +141,10 @@ insert into ac_staging
 -- dataset stats
 ---------------------------------
 
---num species: 306
+--num species: 132
 --num geometries: 1
 
 --species to test:
---Peliperdix coqui
+--Bufo guttatus
 
 
