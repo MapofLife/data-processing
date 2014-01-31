@@ -8,7 +8,7 @@
 -- herps with the lower-case tax. e.g. herps or aves
 -- Herps with the same as taxa column, but capitalize
 -- dmsameera@gmail.com with the email address of the author or organization
--- Bellanwila-Attidiya Sanctuary - the geographic extent eg. "Global" or "Angola" or "New World"
+-- Bellanwila-Attidiya Sbellanwila_attidiyaanctuary - the geographic extent eg. "Global" or "Angola" or "New World"
 --  with null if not applicable
 -- ca. 2005 to 2006 with a string representation for the date range "ca. 1980 to 2010"
 -- 
@@ -18,7 +18,8 @@
 -- Amphibians and Reptiles - same as class but with common names "Plants", or "Birds"
 -- Amphibians: Dutta & Manamendra- Arachchi (1996), Manamendra-Arachchi & Pethiyagoda (2005), Manamendra-Arachchi & Pethiyagoda (2006); Reptiles: Das & de Silva (2005), Deraniyagala (1953; 1955), de Silva (1990), De Silva (1980), Whitaker & Captain (2004) with references for the taxonomy
 
-delete from providers where provider = 'karunarathna'
+--check to see if there is already this provider.  if we do, talk to Ben.
+select * from providers where provider = 'karunarathna'
 
 insert into providers 
 	(provider,pubdate,title,url,source_type)
@@ -36,9 +37,9 @@ insert into data_registry
 	(dataset_id,table_name,geom_table,provider,taxa,classes,dataset_title,seasonality,auto_tax,type,geom_id,geom_link_id,
 		geometry_field,scientificname,ready,style_table,product_type,presence)
 values (
-	'bellanwila-attidiya_herps', --dataset_id: the name of the species list table (same as table_name) e.g. "myanmar_flora"
-	'bellanwila-attidiya_herps', --table_name: the name of the table that holds the species list. note same as dataset_id
-	'bellanwila-attidiya_herps_geom', --geom_table: the name of the geom table.  should be <table_name>_geom eg "myanmar_flora_geom"	
+	'bellanwila_attidiya_herps', --dataset_id: the name of the species list table (same as table_name) e.g. "myanmar_flora"
+	'bellanwila_attidiya_herps', --table_name: the name of the table that holds the species list. note same as dataset_id
+	'bellanwila_attidiya_herps_geom', --geom_table: the name of the geom table.  should be <table_name>_geom eg "myanmar_flora_geom"	
 	'karunarathna', --provider: the key to the provider table (column providers.provider) eg "hillers"	
 	'herps', --taxa: the taxonomic group, like "plants", "aves", herps, etc.  should match dashboard_metadata.class	
 	'Herps', -- classes: same as taxa column, but capitalize
@@ -67,13 +68,13 @@ values (
 -- "Type", put'Local Inventory'
 -- Can include other fields if relevant.
 
---delete from feature_metadata where data_table = 'bellanwila-attidiya_herps' and title = 'Species name'
+--delete from feature_metadata where data_table = 'bellanwila_attidiya_herps' and title = 'Species name'
 
 --Species Name field
 insert into feature_metadata
 	(data_table,field,title,"order") --order and type are keywords so need to be in quotes
 values (
-	'bellanwila-attidiya_herps', --data_table - the name of the species list table. should match data_registry.table_name
+	'bellanwila_attidiya_herps', --data_table - the name of the species list table. should match data_registry.table_name
 
 	-- do not change fields below this line
 	'scientificname', --field - the name of the field to be displayed from the data_table
@@ -81,24 +82,24 @@ values (
 	1 --order - how to order the fields from the data_table
 )
 
--- delete from feature_metadata where data_table = 'bellanwila-attidiya_herps' and title = 'Source'
+-- delete from feature_metadata where data_table = 'bellanwila_attidiya_herps' and title = 'Source'
 -- Source field
 insert into feature_metadata
 	(data_table,field,title,"order") --order and type are keywords so need to be in quotes
 values (
-	'bellanwila-attidiya_herps', --data_table - the name of the species list table. should match data_registry.table_name
+	'bellanwila_attidiya_herps', --data_table - the name of the species list table. should match data_registry.table_name
 	'''Current Status of Faunal Diversity in Bellanwila-Attidiya Sanctuary, Colombo District - Sri Lanka''', --field - the name of the field to be displayed from the data_table
 		
 	-- do not change fields below this line
 	'Source', -- title - the display name of the field
 	2 --order - how to order the fields from the data_table
 )
--- delete from feature_metadata where data_table = 'bellanwila-attidiya_herps' and title = 'Provider'
+-- delete from feature_metadata where data_table = 'bellanwila_attidiya_herps' and title = 'Provider'
 -- Provider field
 insert into feature_metadata
 	(data_table,field,title,"order") --order and type are keywords so need to be in quotes
 values (
-	'bellanwila-attidiya_herps', --data_table - the name of the species list table. should match data_registry.table_name
+	'bellanwila_attidiya_herps', --data_table - the name of the species list table. should match data_registry.table_name
 	'''Karunarathna, 2010''', --field - the name of the field to be displayed from the data_table
 		
 	-- do not change fields below this line
@@ -106,12 +107,12 @@ values (
 	3 --order - how to order the fields from the data_table
 )
 
--- delete from feature_metadata where data_table = 'bellanwila-attidiya_herps' and title = 'URL'
+-- delete from feature_metadata where data_table = 'bellanwila_attidiya_herps' and title = 'URL'
 -- URL field
 insert into feature_metadata
 	(data_table,field,title,"order") --order and type are keywords so need to be in quotes
 values (
-	'bellanwila-attidiya_herps', --data_table - the name of the species list table. should match data_registry.table_name
+	'bellanwila_attidiya_herps', --data_table - the name of the species list table. should match data_registry.table_name
 	'''<a target=''''_blank'''' onclick=''''window.open(this.href)'''' href=''''http://www.sljol.info/sljol/index.php/TAPRO/article/view/2706/2182''''>www.sljol.info</a>''', --field - the name of the field to be displayed from the data_table
 		
 	-- do not change fields below this line
@@ -120,7 +121,7 @@ values (
 )
 
 -- dashboard_metadata
---delete from dashboard_metadata where dataset_id = 'bellanwila-attidiya_herps'
+--delete from dashboard_metadata where dataset_id = 'bellanwila_attidiya_herps'
 insert into dashboard_metadata
 	("class",provider,contact,coverage,dataset_id,date_more,date_range,description,recommended_citation,
 		seasonality,seasonality_more,spatial_metadata,taxon,taxonomy_metadata,url,"type")
@@ -129,7 +130,7 @@ values (
 	'karunarathna', --provider
 	'dmsameera@gmail.com', --contact - email address of contact
 	'Bellanwila-Attidiya Sanctuary', --coverage - the geographic extent eg. "Global" or "Angola" or "New World"
-	'bellanwila-attidiya_herps', --dataset_id - the name of the species list table
+	'bellanwila_attidiya_herps', --dataset_id - the name of the species list table
 	null, --  with null if not applicable
 	'ca. 2005 to 2006', --ca. 2005 to 2006 with a string representation for the date range "ca. 1980 to 2010"
 	'Current Status of Faunal Diversity in Bellanwila-Attidiya Sanctuary, Colombo District - Sri Lanka', --description - string description
