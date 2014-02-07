@@ -18,7 +18,9 @@
 -- %taxon% - same as class but with common names "Plants", or "Birds"
 -- %taxonomy_metadata% with references for the taxonomy
 
-delete from providers where provider = '%provider%'
+-- make sure there is not already a provider record for this provider
+-- if there is, tell Ben.
+select * from providers where provider = '%provider%'
 
 insert into providers 
 	(provider,pubdate,title,url,source_type)
