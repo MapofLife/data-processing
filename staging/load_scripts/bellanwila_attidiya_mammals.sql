@@ -89,7 +89,7 @@ alter column geom_id set not null;
 -----------------------
 -- populate all the surfacing tables
 -----------------------
-
+karunarathna
 -- use other sql template
 
 -----------------------
@@ -97,10 +97,10 @@ alter column geom_id set not null;
 -----------------------
 
 -- test in cartodb, get_tile should map te specis
-SELECT * FROM get_tile('Karunarathna', 'localinv', 'Peliperdix coqui','bellanwila_attidiya_mammals')
+SELECT * FROM get_tile('karunarathna', 'localinv', 'Kerivoula picta','bellanwila_attidiya_mammals')
 
 -- sql to if get_tile does not work.
-SELECT * from data_registry WHERE provider = 'Karunarathna' and type = 'localinv' or table_name = 'bellanwila_attidiya_mammals'
+SELECT * from data_registry WHERE provider = 'karunarathna' and type = 'localinv' or table_name = 'bellanwila_attidiya_mammals'
 
 SELECT d.*,g.*
   FROM bellanwila_attidiya_mammals d
@@ -141,10 +141,10 @@ insert into ac_staging
 -- dataset stats
 ---------------------------------
 
---num species: 306
+--num species: 14
 --num geometries: 1
 
 --species to test:
---Peliperdix coqui
+--Kerivoula picta
 
 

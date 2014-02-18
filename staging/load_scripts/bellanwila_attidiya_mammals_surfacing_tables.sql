@@ -20,12 +20,12 @@
 
 -- make sure there is not already a provider record for this provider
 -- if there is, tell Ben.
-select * from providers where provider = 'Karunarathna'
+select * from providers where provider = 'karunarathna'
 
 insert into providers 
 	(provider,pubdate,title,url,source_type)
 values (
-	'Karunarathna', -- provider: all lower case. the id of the provider (if an article, use the author but not the date).  in the data_registry, this this is stored in the provider field.
+	'karunarathna', -- provider: all lower case. the id of the provider (if an article, use the author but not the date).  in the data_registry, this this is stored in the provider field.
 	null, -- pubdate: year published
 	null, -- title: String title I.e. "Birds of Melanesia". should mach data_registry.dataset_title and dashboard.dataset_title
 	null, --url: Link to the study
@@ -41,7 +41,7 @@ values (
 	'bellanwila_attidiya_mammals', --dataset_id: the name of the species list table (same as table_name) e.g. "myanmar_flora"
 	'bellanwila_attidiya_mammals', --table_name: the name of the table that holds the species list. note same as dataset_id
 	'bellanwila_attidiya_mammals_geom', --geom_table: the name of the geom table.  should be <table_name>_geom eg "myanmar_flora_geom"	
-	'Karunarathna', --provider: the key to the provider table (column providers.provider) eg "hillers"	
+	'karunarathna', --provider: the key to the provider table (column providers.provider) eg "hillers"	
 	'mammals', --taxa: the taxonomic group, like "plants", "aves", herps, etc.  should match dashboard_metadata.class	
 	'Mammals', -- classes: same as taxa column, but capitalize
 	'Current Status of Faunal Diversity in Bellanwila-Attidiya Sanctuary, Colombo District - Sri Lanka', --dataset_title - the publication name.  "Birds of Melanesia" should match providers.title and dashboard dataset.title
@@ -101,7 +101,7 @@ insert into feature_metadata
 	(data_table,field,title,"order") --order and type are keywords so need to be in quotes
 values (
 	'bellanwila_attidiya_mammals', --data_table - the name of the species list table. should match data_registry.table_name
-	'''Karunarathna, 2010''', --field - the name of the field to be displayed from the data_table
+	'''karunarathna, 2010''', --field - the name of the field to be displayed from the data_table
 		
 	-- do not change fields below this line
 	'Provider', -- title - the display name of the field
@@ -128,7 +128,7 @@ insert into dashboard_metadata
 		seasonality,seasonality_more,spatial_metadata,taxon,taxonomy_metadata,url,"type")
 values (
 	'mammals', --class - the taxonomic group, like "plants" or "aves".  should match data_registry.taxa
-	'Karunarathna', --provider
+	'karunarathna', --provider
 	'dmsameera@gmail.com', --contact - email address of contact
 	'Bellanwila-Attidiya Sanctuary', --coverage - the geographic extent eg. "Global" or "Angola" or "New World"
 	'bellanwila_attidiya_mammals', --dataset_id - the name of the species list table
