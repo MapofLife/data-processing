@@ -89,7 +89,7 @@ alter column geom_id set not null;
 -----------------------
 -- populate all the surfacing tables
 -----------------------
-karunarathna
+
 -- use other sql template
 
 -----------------------

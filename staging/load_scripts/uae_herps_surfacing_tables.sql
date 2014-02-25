@@ -130,7 +130,7 @@ values (
 	'herps', --class - the taxonomic group, like "plants" or "aves".  should match data_registry.taxa
 	'soorae', --provider
 	'psoorae@ead.ae', --contact - email address of contact
-	'United Arab Emirated', --coverage - the geographic extent eg. "Global" or "Angola" or "New World"
+	'United Arab Emirates', --coverage - the geographic extent eg. "Global" or "Angola" or "New World"
 	'uae_herps', --dataset_id - the name of the species list table
 	null, --  with null if not applicable
 	null, -- with a string representation for the date range "ca. 1980 to 2010"
