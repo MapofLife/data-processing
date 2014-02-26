@@ -18,13 +18,13 @@
 -- %taxon% - same as class but with common names "Plants", or "Birds"
 -- %taxonomy_metadata% with references for the taxonomy
 
--- make sure there is not already a provider record for this provider
--- if there is, tell Ben.
-select * from providers where provider = '%provider%'
+-- this statement inserts the provider (i.e. the author of the study) into the providers table
+-- it is possible that an author has multiple studies, and we already have the provider in the table
+-- this statement will check that condition and will only insert if the provider is not already in the table
 
 insert into providers 
 	(provider,pubdate,title,url,source_type)
-values (
+select
 	'%provider%', -- provider: all lower case. the id of the provider (if an article, use the author but not the date).  in the data_registry, this this is stored in the provider field.
 	null, -- pubdate: year published
 	null, -- title: String title I.e. "Birds of Melanesia". should mach data_registry.dataset_title and dashboard.dataset_title
@@ -32,7 +32,7 @@ values (
 
 	-- do not change below fields
 	'scilit' --source_type: <wwf | webuser | mol | gbif | iucn | ebird | scilit >
-)
+where not exists (select * from providers where provider = '%provider%')
 
 insert into data_registry
 	(dataset_id,table_name,geom_table,provider,taxa,classes,dataset_title,seasonality,auto_tax,type,geom_id,geom_link_id,
