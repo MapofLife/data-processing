@@ -84,6 +84,16 @@ set geom_id = 1
 alter table %dataset_id%
 alter column geom_id set not null;
 
+-------------------
+-- final checks ---
+-------------------
+
+--this line should return only one line that has 't' for valid_geom and valid_geom_wm
+--this means that all geometries are valid and don't have internal issues
+--if there is another line that has 'f' anywhere then tell Ben.  This means the table has invalid geometries
+select count(*) as num, st_isvalid(the_geom) as valid_geom, st_isvalid(the_geom_webmercator) as valid_geom_wm 
+from %dataset_id%_geom group by valid_geom, valid_geom_wm
+
 -- make species list and geom table public in cartodb
 
 -----------------------
