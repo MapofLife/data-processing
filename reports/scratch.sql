@@ -84,3 +84,11 @@ group by dataset_id
 
 select version()
 select postgis_full_version()
+
+select * from data_registry 
+where product_type in ('localinv','regionalchecklist') 
+and type not in ('taxogeochecklist','points')
+and classes not in ('Plants','Insecta','Gastropods','Crustaceans','Trees','Fish','Odonata','Seagrasses','Coral','Beetles','Palms','Mangroves','Flora')
+and geom_table = 'wdpa2010'
+
+select populate_all_checklist_geom();

@@ -1,4 +1,48 @@
-﻿---
+﻿
+-- input data
+-- we want all datasets where product_type is localinv or regional checklist
+-- most are of type (i.e. schema) "geochecklist".  this means they have a species table and a geometry table.
+-- a total of 8 are of type points or taxogeochecklist. I examined all 8 of these with Jeremy (see notebook for notes)
+-- and found that we don't want to include any of them.
+select count(*), product_type,type from data_registry where product_type in ('localinv','regionalchecklist') group by product_type,type order by type
+
+--this will return all of the checklists we actually want. useful fields: dataset_title, table_name, geom_id, geom_table, geom_link_id
+--we don't want silva_species since this is actually point data.
+select * from data_registry 
+where product_type in ('localinv','regionalchecklist') 
+and type not in ('taxogeochecklist','points')
+and classes not in ('Plants','Insecta','Gastropods','Crustaceans','Trees','Fish','Odonata','Seagrasses','Coral','Beetles','Palms','Mangroves','Flora')
+and table_name not in ('silva_species')
+
+-- the row count for both these two should match.  sadly they don't for several datasets.  see below.
+select distinct link_id from birds_of_melanesia
+
+select g.link_id from birds_of_melanesia_geoms g
+inner join birds_of_melanesia sp on sp.link_id = g.link_id
+group by g.link_id
+
+--Biologial inventories of the world's protected areas - amphdata, - 226/378 - POLY
+--Biologial inventories of the world's protected areas - birddata, - 227/449 - POLY
+--Biologial inventories of the world's protected areas - mammaldata - 276/411 - POLY
+--Checklist Journal (checklist_journal) - 95/167 -- POLY
+--birds of melanesia - 468/469 -- POLY
+--india biodivesity portal - 105/113 -- POLY
+--amphibian local inventories (silva_species) -27/27 -- POINT
+--New world mammal inventories (mamm_inventories_catu) -374/379 -- POLY
+--new world amphibian inventories (amph_inventories_catu) - 321/324 -- POLY
+--new world bird inventories (bird_inventories_catu) - 451/456 -- POLY
+--reptiles and amphibians of the west indies (herps_west_indies) - 694/694 -- POLY
+
+-- some of these geometries are actually points
+select geometrytype(the_geom_webmercator) t from "herps_west_indies_geometry" group by t --POINT
+
+select g.cartodb_id as poly_id, g.the_geom_webmercator from silva_sites g
+inner join (select distinct site_id from silva_species) sp on sp.site_id = g.site_id
+
+-- ############ --
+--  Older Code  --
+-- ############ --
+---
 --- spatial queries
 ---
 
@@ -79,6 +123,7 @@ select iso, st_multi(st_union(the_geom)) as the_geom FROM gadm2_country_bbox
 group by iso
 -- check geometries
 select st_isvalid(the_geom), geometrytype(the_geom) FROM gadm2_country_multi
+
 
 -- union the polygons back into multipolygons based on the study and geom_name
 -- st_union needs to be used to dissolve duplicate geoms created out of the join process

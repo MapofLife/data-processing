@@ -11,21 +11,38 @@ $BODY$
   declare taxa text;
   declare g_name text;
   declare g_name_count bigint;
+  declare geom_table_sql text;
   
   BEGIN
 	delete from all_checklist_geom;
 
-	FOR data in (	select * from data_registry 
-			where type = 'geochecklist' and product_type in ('localinv') and geom_table != 'wdpa2010'
-			and geom_table like '%_geom' --this brings back a smaller subset for testing
-			order by product_type) LOOP
-		raise notice '%', 'select * from ' || data.geom_table;
+	--table_name: the name of the species table
+	--geom_id: the foreign key for the geometry (in the species table)
+	--geom_table: the name of the geometry table
+	--geom_link_id: the id for the geometry (in the geometry table)	
+	FOR data in (	
+			--this will return all of the checklists we actually want. useful fields: dataset_title, table_name, geom_id, geom_table, geom_link_id
+			--we don't want silva_species since this is actually point data.
+			--TODO: look for other data sets that are points and filter these out. we don't have a way of labeling "checklist data stored as points"
+			select * from data_registry 
+			where product_type in ('localinv','regionalchecklist') 
+			and type not in ('taxogeochecklist','points')
+			and classes not in ('Plants','Insecta','Gastropods','Crustaceans','Trees','Fish','Odonata','Seagrasses','Coral','Beetles','Palms','Mangroves','Flora')
+			and table_name not in ('silva_species')
+			and table_name in ('checklist_journal') -- use a single table now for testing purposes
+			) loop
 
-		for geom_table_row in execute 
-			'select * from ' || data.geom_table 
-			loop
+		geom_table_sql := format(			
+			'select g.cartodb_id as poly_id, g.the_geom_webmercator from %I g
+			inner join (select distinct %I from %I) sp on g.%I = sp.%I',
+			data.geom_table,data.geom_id,data.table_name,data.geom_link_id,data.geom_id
+			);
+			
+		raise notice '%', geom_table_sql;
 
-			if data.taxa is null then 
+		for geom_table_row in execute geom_table_sql loop
+
+			if data.taxa is null then --TODO use classes field instead of taxa field
 				taxa := 'null'; 
 			else 
 				taxa := '''' || data.taxa || ''''; 
@@ -41,14 +58,12 @@ $BODY$
 			if g_name_count > 0 then g_name := '''' || geom_table_row.geom_name || ''''; else g_name := 'null'; end if;
 			
 			raise notice 'g_name:%', g_name;
-
-			--st_makevalid will attempt to fix any invalid geometries			                                                                                                                                                                                          
+			                                                                                                                                                                                          
 			sql := 'insert into all_checklist_geom 
-				(dataset_id,taxa,the_geom,the_geom_webmercator,geom_name)
+				(dataset_id,taxa,the_geom_webmercator,geom_name)
 				values('
 				|| '''' || data.dataset_id || ''','
 				|| taxa || ','
-				|| 'ST_GeomFromText(''' || ST_AsText(geom_table_row.the_geom) ||''',4326),'
 				|| 'ST_GeomFromText(''' || ST_AsText(geom_table_row.the_geom_webmercator) || ''',3857),'
 				|| g_name 
 				|| ')';
@@ -61,6 +76,4 @@ $BODY$
   LANGUAGE plpgsql VOLATILE
   COST 100;
 ALTER FUNCTION public.populate_all_checklist_geom()
-  OWNER TO cartodb_user_2;
-
-select populate_all_checklist_geom();
+  OWNER TO "cartodb_user_b4ba2644-9de0-43d0-86fb-baf3b484ccd3";
