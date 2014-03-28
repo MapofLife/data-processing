@@ -305,3 +305,10 @@ create table gadm2_country_multi1 as
 	select iso, st_multi(st_union(the_geom)) as the_geom 
 	from gadm2_country_bbox1
 	group by iso
+
+select distinct classes from data_registry 
+where classes not in ('Plants','Insecta','Gastropods','Crustaceans','Trees','Fish','Odonata','Seagrasses','Coral','Beetles','Palms','Mangroves','Flora')
+
+"All", "Amphibia", "Amphibians", "Aves", "Amphibia,Aves,Reptilia,Mammalia", "Herps","Bats", "Plants, Fish, Mammals", "Mammalia", "Herpatofauna", "Mammalia,Amphibia,Aves,Reptilia,Fish", "Aves, Mammals", "Herpetofauna", "Mammals", "Amphibia,Reptilia", "Reptilia", "Reptiles"
+
+select distinct dataset_id from all_checklist_geom order by dataset_id

@@ -171,7 +171,7 @@ select count(*) from all_checklist_geom_multi1 --3295
 select count(*) from all_checklist_geom --3391
 
 -- st_union needs to be used to dissolve duplicate geoms created out of the join process
--- create the table in the web ui: all_checklist_geom_multi
+-- create the table in the web ui: all_checklist_geom_multi1
 select iso, st_multi(st_union(the_geom)) as the_geom 
 from gadm2_country_bbox1
 group by iso
@@ -179,11 +179,11 @@ group by iso
 -- check geometries
 select st_isvalid(the_geom) as v, geometrytype(the_geom) as typ from gadm2_country_multi1 group by v, typ
 -- we should have significantly fewer geometries in this table, and the geometries themselves should be much simpler
-select count(*) from gadm2_country_multi1
-select count(*) from gadm2_country
+select count(*) from gadm2_country_multi1 --167
+select count(*) from gadm2_country -- 253
 
-create index all_checklist_geom_multi1_the_geom on table all_checklist_geom_multi1 using gist(the_geom)
-create index gadm2_country_multi1_the_geom on table gadm2_country_multi1 using gist(the_geom)
+create index all_checklist_geom_multi1_the_geom on all_checklist_geom_multi1 using gist(the_geom)
+create index gadm2_country_multi1_the_geom on gadm2_country_multi1 using gist(the_geom)
 
 vacuum analyze all_checklist_geom_multi1
 vacuum analyze gadm2_country_multi1
@@ -191,8 +191,8 @@ vacuum analyze gadm2_country_multi1
 -- ## 5. now perform full spatial join based on reduced multipolygons
 
 select g.iso, count(*)
-from all_checklist_geom_multi as c  
-join gadm2_country_multi as g
+from all_checklist_geom_multi1 as c  
+join gadm2_country_multi1 as g
 on ST_Intersects(c.the_geom, g.the_geom)
 group by g.iso
 
