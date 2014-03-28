@@ -39,18 +39,24 @@ select geometrytype(the_geom_webmercator) t from "herps_west_indies_geometry" gr
 select g.cartodb_id as poly_id, g.the_geom_webmercator from silva_sites g
 inner join (select distinct site_id from silva_species) sp on sp.site_id = g.site_id
 
--- ############ --
---  Older Code  --
--- ############ --
----
---- spatial queries
----
+-- run the function that aggregates all vertabrate checklists that we are interested in
+select populate_all_checklist_geom();
+vac
+-- checklist data: look for bad geometries
+select count(*), st_isvalid(the_geom) as g, st_isvalid(the_geom_webmercator) as gm
+from all_checklist_geom group by g, gm
 
--- attempt #1, using multipolygons
--- count number of geometries from all_checklist_geom
--- that intersect gadm2_country
--- filter out bad geometries
--- this times out in the web interface
+--111 - both g and gm are bad
+--10  - g good but gm bad
+--3270 - both g and gm good
+-- use the_geom, there are fewer bad geometries
+
+-- country data: look for bad geometries
+select count(*), st_isvalid(the_geom) as g, st_isvalid(the_geom_webmercator) as gm
+from gadm2_country group by g, gm
+
+--- #### Join ####
+-- do the spatial join with the gadm.  too slow!  use manual process to join
 select
 	g.iso,
 	count(*)
@@ -60,182 +66,148 @@ on ST_Intersects(c.the_geom, g.the_geom)
 where st_isvalid(c.the_geom) and st_isvalid(g.the_geom)
 group by g.iso
 
--- attempt #2, using polygons
--- tables are de-composited multipolygons into single polygons and do not include invalid geoms
-select
-	g.iso,
-	count(*)
-from all_checklist_geom_dumpvalid as c  
-join gadm2_country_dumpvalid as g
-on ST_Intersects(c.the_geom, g.the_geom)
-group by g.iso
+--- #### Manual join process ####
+--- 1. decompose all multipolygons into polygons
+--- 2. filter out all invalid polygons
+--- 3. do a bounding box only query and create new tables that only have geometrys that have bounding box intersections
+--- 4. merge polygons back into multipolygons
+--- 5. now perform full spatial join based on reduced multipolygons
 
--- attempt #2, using polygons
--- tables are de-composited multipolygons into single polygons and do not include invalid geoms
--- also filter out datasets that I know are not protected areas
-select
-	g.iso,
-	count(*)
-from all_checklist_geom_dumpvalid as c  
-join gadm2_country_dumpvalid as g
-on ST_Intersects(c.the_geom, g.the_geom)
-where c.dataset_id not in ('italianislands_mammals','guiana_mammals','myanmar_flora','flora_vladimir_oblast')
-group by g.iso
+-- ## 1. decompose all multipolygons into polygons
 
--- attempt #3 
--- works!
-select
-	*
+-- this will tell me how may rows the dumpvalid table should have, if I want to combine steps 1 & 2
+select count(*), st_isvalid(the_geom) as val from (
+select dataset_id, taxa, geom_name, poly_id, (st_dump(the_geom)).geom AS the_geom
+	from all_checklist_geom) s
+group by val
+
+-- create the table in the web ui: all_checklist_geom_dump1
+	select dataset_id, taxa, geom_name, poly_id, (st_dump(the_geom)).geom AS the_geom
+	from all_checklist_geom
+
+select count(*), st_isvalid(the_geom) as v from all_checklist_geom_dump1 group by v --422 geoms that are invalid, 36,580 valid
+
+-- create the table in the web ui: gadm2_country_dump1
+	select iso, (st_dump(the_geom)).geom AS the_geom
+	from gadm2_country
+
+select count(*), st_isvalid(the_geom) as v from gadm2_country_dump1 group by v -- 6 geoms that are invalid,  87,460 valid
+
+-- ## 2. filter out all invalid polygons
+
+-- create the table in the web ui: all_checklist_geom_dumpvalid1
+-- note: don't think we need dump_id here
+	select cartodb_id as dump_id, dataset_id, taxa, geom_name, poly_id, the_geom
+	from all_checklist_geom_dump1
+	where st_isvalid(the_geom)
+
+select count(*), st_isvalid(the_geom) as v from all_checklist_geom_dumpvalid1 group by v --0 invalid, 36,580 valid
+select count(*), geometrytype(the_geom) as typ, st_numgeometries(the_geom) as n, st_srid(the_geom) as srid 
+from all_checklist_geom_dumpvalid1 group by typ, srid, n --MULTIPOLYGON, 4326, n=1 (type is polygon if table was created using the web ui, but note only 1 geometry in the multi)
+
+-- create the table in the web ui: gadm2_country_dumpvalid1
+-- note: don't think we need dump_id here
+select cartodb_id as dump_id, iso, the_geom
+from gadm2_country_dump1
+where st_isvalid(the_geom)
+
+select count(*), st_isvalid(the_geom) as v from gadm2_country_dumpvalid1 group by v --0 invalid, 87,460 valid
+select count(*), geometrytype(the_geom) as typ, st_numgeometries(the_geom) as n, st_srid(the_geom) as srid 
+from gadm2_country_dumpvalid1 group by typ, srid, n --MULTIPOLYGON, 4326, n=1 (type is polygon if table was created using the web ui, but note only 1 geometry in the multi)
+
+create index all_checklist_geom_dumpvalid1_the_geom on all_checklist_geom_dumpvalid1 using gist(the_geom)
+create index gadm2_country_dumpvalid1_the_geom on gadm2_country_dumpvalid1 using gist(the_geom)
+
+vacuum analyze all_checklist_geom_dumpvalid1
+vacuum analyze gadm2_country_dumpvalid1
+
+-- ## 3. do a bounding box only query and create new tables that only have geometrys that have bounding box intersections
+
+-- pull out polygons for the checklist table that have a bounding box match
+-- do the join to get the id's of the matching polygons, then join back to the original table
+-- we have to do this b/c otherwise rows are duplicated
+
+-- create the table in the web ui: all_checklist_geom_bbox1
+select d.dataset_id, d.taxa, d.geom_name, d.poly_id, d.the_geom 
+from (
+	select c.cartodb_id
+	from all_checklist_geom_dumpvalid1 as c  
+	join gadm2_country_dumpvalid1 as g
+	on c.the_geom && g.the_geom 
+	group by c.cartodb_id) s
+inner join all_checklist_geom_dumpvalid1 as d 
+on s.cartodb_id = d.cartodb_id
+
+select count(*) from all_checklist_geom_bbox1
+
+-- create the table in the web ui: gadm2_country_bbox1
+select d.iso, d.the_geom
+from (
+	select g.cartodb_id
+	from all_checklist_geom_dumpvalid1 as c  
+	join gadm2_country_dumpvalid1 as g
+	on c.the_geom && g.the_geom 
+	group by g.cartodb_id) s
+inner join gadm2_country_dumpvalid1 as d 
+on s.cartodb_id = d.cartodb_id
+
+select count(*) from gadm2_country_bbox1 --25921
+
+-- ## 4. merge polygons back into multipolygons
+
+-- union the polygons back into multipolygons based on the study and geom_name
+-- st_union needs to be used to dissolve duplicate geoms created out of the join process - Note: I think this is not an issue anymore
+-- create the table in the web ui: all_checklist_geom_multi
+	select dataset_id, taxa, geom_name, st_multi(st_union(the_geom)) as the_geom 
+	from all_checklist_geom_bbox1
+	group by poly_id, geom_name, dataset_id, taxa 	
+
+-- check geometries
+select st_isvalid(the_geom) as v, geometrytype(the_geom) as typ from all_checklist_geom_multi1 group by v, typ
+-- we *should* be left with the same number of geometries as from all_checklist_geom.  
+-- although we could have lost a few due to filtering out invalids and only taking those that bbox intersected with the gadm2
+-- looks like we lost around 100 geoms
+select count(*) from all_checklist_geom_multi1 --3295
+select count(*) from all_checklist_geom --3391
+
+-- st_union needs to be used to dissolve duplicate geoms created out of the join process
+-- create the table in the web ui: all_checklist_geom_multi
+select iso, st_multi(st_union(the_geom)) as the_geom 
+from gadm2_country_bbox1
+group by iso
+	
+-- check geometries
+select st_isvalid(the_geom) as v, geometrytype(the_geom) as typ from gadm2_country_multi1 group by v, typ
+-- we should have significantly fewer geometries in this table, and the geometries themselves should be much simpler
+select count(*) from gadm2_country_multi1
+select count(*) from gadm2_country
+
+create index all_checklist_geom_multi1_the_geom on table all_checklist_geom_multi1 using gist(the_geom)
+create index gadm2_country_multi1_the_geom on table gadm2_country_multi1 using gist(the_geom)
+
+vacuum analyze all_checklist_geom_multi1
+vacuum analyze gadm2_country_multi1
+
+-- ## 5. now perform full spatial join based on reduced multipolygons
+
+select g.iso, count(*)
 from all_checklist_geom_multi as c  
 join gadm2_country_multi as g
 on ST_Intersects(c.the_geom, g.the_geom)
-order by dataset_id
-
--- how many intersections are there?
--- 8611 when keeping all datasets in
--- 374 when filtering out big non-protected area datasets
-select c.dataset_id, c.the_geom as c_the_geom, g.iso, g.the_geom as g_the_geom
-from all_checklist_geom_dumpvalid as c  
-join gadm2_country_dumpvalid as g
-on c.the_geom && g.the_geom
-where c.dataset_id not in ('italianislands_mammals','guiana_mammals','myanmar_flora','flora_vladimir_oblast')
-
--- pull out polygons for the country table that have a bounding box match
-create table gadm2_country_bbox as
-select g.iso, g.the_geom
-from all_checklist_geom_dumpvalid as c  
-join gadm2_country_dumpvalid as g
-on c.the_geom && g.the_geom
-where c.dataset_id not in ('italianislands_mammals','guiana_mammals','myanmar_flora','flora_vladimir_oblast')
-
--- pull out polygons for the checklist table that have a bounding box match
-create table all_checklist_geom_bbox as
-select c.dataset_id, c.taxa, c.geom_name, c.the_geom
-from all_checklist_geom_dumpvalid as c  
-join gadm2_country_dumpvalid as g
-on c.the_geom && g.the_geom
-where c.dataset_id not in ('italianislands_mammals','guiana_mammals','myanmar_flora','flora_vladimir_oblast')
-
--- union the polygons back into multipolygons based on the country
--- st_union needs to be used to dissolve duplicate geoms created out of the join process
-create table gadm2_country_multi as
-select iso, st_multi(st_union(the_geom)) as the_geom FROM gadm2_country_bbox
-group by iso
--- check geometries
-select st_isvalid(the_geom), geometrytype(the_geom) FROM gadm2_country_multi
+group by g.iso
 
 
--- union the polygons back into multipolygons based on the study and geom_name
--- st_union needs to be used to dissolve duplicate geoms created out of the join process
-create table all_checklist_geom_multi as
-select dataset_id, taxa, geom_name, st_multi(st_union(the_geom)) as the_geom FROM all_checklist_geom_bbox
-group by dataset_id, taxa, geom_name
--- check geometries
-select st_isvalid(the_geom), geometrytype(the_geom) FROM all_checklist_geom_multi
+-- ## 6. cleanup
+drop table all_checklist_geom_dump1
+drop table all_checklist_geom_dumpvalid1
+drop table all_checklist_geom_bbox1
+drop table all_checklist_geom_multi1
 
----
---- Approach
---- decompose all multipolygons into polygons
---- filter out all invalid polygons
---- do a bounding box only query and create new tables that only have geometrys that have bounding box intersections
---- merge polygons back into multipolygons
---- - TODO: for this step, need to include cartodb id in all_checklist_geom table for group by to work correctly
---- now perform full spatial join based on multipolygons
-
-
---- Create tables of valid polygons from checklist and country data sets
----
-
---- check to make sure that the_geom and the_geom_webmercator are both valid or invalid consistently
-select count(*) from all_checklist_geom where st_isvalid(the_geom) != st_isvalid(the_geom_webmercator) --should return 0
-
---how many rows are in all_checklist_geom?
-select count(*) from all_checklist_geom --465
---how many rows are valid?
-select count(*) from all_checklist_geom where st_isvalid(the_geom) --448
-
---- 
---- check to see if we should filter then dump, or dump and then filter
---- conclusion: it's better to dump and then filter
----
-
--- how many rows does st_dump result in?
-select count(*) from (
-select dataset_id, taxa, geom_name, (st_dump(the_geom)).geom AS the_geom
-from all_checklist_geom) s -- 3032 rows
-
--- how many rows result if we filter out invalid geoms before dump 
-select count(*) from (
-	select dataset_id, taxa, geom_name, (st_dump(the_geom)).geom AS the_geom
-	from all_checklist_geom
-	where st_isvalid(the_geom)) s --506 rows
-
--- how many rows result if we only dump invalid geoms
--- should have dump from valid geoms + dump from invalid geoms = dump of all geoms
--- 506 + 2526 = 3032
-select count(*) from (
-	select dataset_id, taxa, geom_name, (st_dump(the_geom)).geom AS the_geom
-	from all_checklist_geom
-	where not st_isvalid(the_geom)) s --2526
-
--- how many rows result if we dump and only then filter out invalid geoms?
--- note here that we have 3014 valid geoms, as opposed to only 506 when we filtered before dumping
--- so, it is better to dump first and then filter out bad geoms
-select count(*) from (
-	select dataset_id, taxa, geom_name, (st_dump(the_geom)).geom AS the_geom
-	from all_checklist_geom) s
-where st_isvalid(the_geom) --3014
-
--- how many rows result if we only dump invalid geoms
--- should have dump from valid geoms + dump from invalid geoms = dump of all geoms
--- 3014 + 18 = 3032
-select count(*) from (
-	select dataset_id, taxa, geom_name, (st_dump(the_geom)).geom AS the_geom
-	from all_checklist_geom) s
-where not st_isvalid(the_geom) --18
-
----
---- create the all_checklist_geoms_dumpvalid table
----
-
--- first make sure that the dump will result in all polygons and all valid geoms
-select geometrytype(the_geom) as typ, st_isvalidreason(the_geom) as r from (
-	select dataset_id, taxa, geom_name, (st_dump(the_geom)).geom AS the_geom
-	from all_checklist_geom) s
-where st_isvalid(the_geom)
-group by typ, r
-
--- query to create the table
-create table all_checklist_geom_dumpvalid as
-select * from (
-	select dataset_id, taxa, geom_name, (st_dump(the_geom)).geom AS the_geom
-	from all_checklist_geom) s
-where st_isvalid(the_geom)
--- make sure all geometries are still polygons and are still valid
-select geometrytype(the_geom) typ, st_isvalid(the_geom) v 
-from all_checklist_geom_dumpvalid
-group by typ,v
+drop table gadm2_country_dump1
+drop table gadm2_country_dumpvalid1
+drop table gadm2_country_bbox1
+drop table gadm2_country_multi1
 
 
 
----
---- create the gadm2_country_dumpvalid table
----
 
--- first make sure that the dump will result in all polygons and all valid geoms
-select geometrytype(the_geom) as typ, st_isvalidreason(the_geom) as r from (
-	select iso, (st_dump(the_geom)).geom AS the_geom
-	from gadm2_country) s
-where st_isvalid(the_geom)
-group by typ, r
-
--- query to create the table
-create table gadm2_country_dumpvalid as
-select * from (
-	select iso, (st_dump(the_geom)).geom AS the_geom
-	from gadm2_country) s
-where st_isvalid(the_geom)
--- make sure all geoms are valid and are polygons
-select geometrytype(the_geom) typ, st_isvalid(the_geom) v 
-from gadm2_country_dumpvalid
-group by typ,v
