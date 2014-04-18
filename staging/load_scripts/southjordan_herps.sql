@@ -1,4 +1,4 @@
-﻿--F5 - Execute selection
+--F5 - Execute selection
 --Replace All 
 -- southjordan_herps with the species table name
 -- AlQuran with provider e.g. 'stalmans'
@@ -141,10 +141,10 @@ insert into ac_staging
 -- dataset stats
 ---------------------------------
 
---num species: 306
+--num species: 75
 --num geometries: 1
 
 --species to test:
---Peliperdix coqui
+—Mabuya vittata
 
 
