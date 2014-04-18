@@ -1,24 +1,25 @@
-﻿-- karunarathna with provider e.g. 'stalmans'
+﻿-- Karunarathna with provider e.g. 'stalmans'
 -- Karunarathna with provider but capitalized, such as 'Stalmans'
 -- Current Status of Faunal Diversity in Bellanwila-Attidiya Sanctuary, Colombo District - Sri Lanka with title e.g. 'Tinleys plant species list for the greater Gorongosa ecosystem'
--- bellanwila-attidiya_herps with dataset id (table name) e.g 'gorongosa_flora'
+-- bellanwila_attidiya_mammals with dataset id (table name) e.g 'gorongosa_flora'
 -- 2010 with year of publication e.g. '2010' 
 -- http://www.sljol.info/sljol/index.php/TAPRO/article/view/2706/2182 with the full url to the study e.g. http://oo.adu.org.za/content.php?id=4
 -- www.sljol.info with the short url to the study e.g. oo.adu.org.za
--- herps with the lower-case tax. e.g. herps or aves
--- Herps with the same as taxa column, but capitalize
+-- mammals with the lower-case tax. e.g. herps or aves
+-- Mammals with the same as taxa column, but capitalize
 -- dmsameera@gmail.com with the email address of the author or organization
--- Bellanwila-Attidiya Sbellanwila_attidiyaanctuary - the geographic extent eg. "Global" or "Angola" or "New World"
+-- Bellanwila-Attidiya Sanctuary - the geographic extent eg. "Global" or "Angola" or "New World"
 --  with null if not applicable
 -- ca. 2005 to 2006 with a string representation for the date range "ca. 1980 to 2010"
 -- 
 -- none - null if none
 --  - null if none
 -- WDPA 2010 - what was used for spatial information
--- Amphibians and Reptiles - same as class but with common names "Plants", or "Birds"
--- Amphibians: Dutta & Manamendra- Arachchi (1996), Manamendra-Arachchi & Pethiyagoda (2005), Manamendra-Arachchi & Pethiyagoda (2006); Reptiles: Das & de Silva (2005), Deraniyagala (1953; 1955), de Silva (1990), De Silva (1980), Whitaker & Captain (2004) with references for the taxonomy
+-- Mammals - same as class but with common names "Plants", or "Birds"
+-- Mammals: Phillips (1980) with references for the taxonomy
 
---check to see if there is already this provider.  if we do, talk to Ben.
+-- make sure there is not already a provider record for this provider
+-- if there is, tell Ben.
 select * from providers where provider = 'karunarathna'
 
 insert into providers 
@@ -37,12 +38,12 @@ insert into data_registry
 	(dataset_id,table_name,geom_table,provider,taxa,classes,dataset_title,seasonality,auto_tax,type,geom_id,geom_link_id,
 		geometry_field,scientificname,ready,style_table,product_type,presence)
 values (
-	'bellanwila_attidiya_herps', --dataset_id: the name of the species list table (same as table_name) e.g. "myanmar_flora"
-	'bellanwila_attidiya_herps', --table_name: the name of the table that holds the species list. note same as dataset_id
-	'bellanwila_attidiya_herps_geom', --geom_table: the name of the geom table.  should be <table_name>_geom eg "myanmar_flora_geom"	
+	'bellanwila_attidiya_mammals', --dataset_id: the name of the species list table (same as table_name) e.g. "myanmar_flora"
+	'bellanwila_attidiya_mammals', --table_name: the name of the table that holds the species list. note same as dataset_id
+	'bellanwila_attidiya_mammals_geom', --geom_table: the name of the geom table.  should be <table_name>_geom eg "myanmar_flora_geom"	
 	'karunarathna', --provider: the key to the provider table (column providers.provider) eg "hillers"	
-	'herps', --taxa: the taxonomic group, like "plants", "aves", herps, etc.  should match dashboard_metadata.class	
-	'Herps', -- classes: same as taxa column, but capitalize
+	'mammals', --taxa: the taxonomic group, like "plants", "aves", herps, etc.  should match dashboard_metadata.class	
+	'Mammals', -- classes: same as taxa column, but capitalize
 	'Current Status of Faunal Diversity in Bellanwila-Attidiya Sanctuary, Colombo District - Sri Lanka', --dataset_title - the publication name.  "Birds of Melanesia" should match providers.title and dashboard dataset.title
 	0, --seasonality: name of the seasonality field.  0 if none
 	true, --auto_tax: short for 'autonomous taxonomy'.  i.e. true if we use the tax in from the dataset, false if we use MOL tax.  usually true
@@ -68,13 +69,13 @@ values (
 -- "Type", put'Local Inventory'
 -- Can include other fields if relevant.
 
---delete from feature_metadata where data_table = 'bellanwila_attidiya_herps' and title = 'Species name'
+--delete from feature_metadata where data_table = 'bellanwila_attidiya_mammals' and title = 'Species name'
 
 --Species Name field
 insert into feature_metadata
 	(data_table,field,title,"order") --order and type are keywords so need to be in quotes
 values (
-	'bellanwila_attidiya_herps', --data_table - the name of the species list table. should match data_registry.table_name
+	'bellanwila_attidiya_mammals', --data_table - the name of the species list table. should match data_registry.table_name
 
 	-- do not change fields below this line
 	'scientificname', --field - the name of the field to be displayed from the data_table
@@ -82,37 +83,37 @@ values (
 	1 --order - how to order the fields from the data_table
 )
 
--- delete from feature_metadata where data_table = 'bellanwila_attidiya_herps' and title = 'Source'
+-- delete from feature_metadata where data_table = 'bellanwila_attidiya_mammals' and title = 'Source'
 -- Source field
 insert into feature_metadata
 	(data_table,field,title,"order") --order and type are keywords so need to be in quotes
 values (
-	'bellanwila_attidiya_herps', --data_table - the name of the species list table. should match data_registry.table_name
+	'bellanwila_attidiya_mammals', --data_table - the name of the species list table. should match data_registry.table_name
 	'''Current Status of Faunal Diversity in Bellanwila-Attidiya Sanctuary, Colombo District - Sri Lanka''', --field - the name of the field to be displayed from the data_table
 		
 	-- do not change fields below this line
 	'Source', -- title - the display name of the field
 	2 --order - how to order the fields from the data_table
 )
--- delete from feature_metadata where data_table = 'bellanwila_attidiya_herps' and title = 'Provider'
+-- delete from feature_metadata where data_table = 'bellanwila_attidiya_mammals' and title = 'Provider'
 -- Provider field
 insert into feature_metadata
 	(data_table,field,title,"order") --order and type are keywords so need to be in quotes
 values (
-	'bellanwila_attidiya_herps', --data_table - the name of the species list table. should match data_registry.table_name
-	'''Karunarathna, 2010''', --field - the name of the field to be displayed from the data_table
+	'bellanwila_attidiya_mammals', --data_table - the name of the species list table. should match data_registry.table_name
+	'''karunarathna, 2010''', --field - the name of the field to be displayed from the data_table
 		
 	-- do not change fields below this line
 	'Provider', -- title - the display name of the field
 	3 --order - how to order the fields from the data_table
 )
 
--- delete from feature_metadata where data_table = 'bellanwila_attidiya_herps' and title = 'URL'
+-- delete from feature_metadata where data_table = 'bellanwila_attidiya_mammals' and title = 'URL'
 -- URL field
 insert into feature_metadata
 	(data_table,field,title,"order") --order and type are keywords so need to be in quotes
 values (
-	'bellanwila_attidiya_herps', --data_table - the name of the species list table. should match data_registry.table_name
+	'bellanwila_attidiya_mammals', --data_table - the name of the species list table. should match data_registry.table_name
 	'''<a target=''''_blank'''' onclick=''''window.open(this.href)'''' href=''''http://www.sljol.info/sljol/index.php/TAPRO/article/view/2706/2182''''>www.sljol.info</a>''', --field - the name of the field to be displayed from the data_table
 		
 	-- do not change fields below this line
@@ -121,16 +122,16 @@ values (
 )
 
 -- dashboard_metadata
---delete from dashboard_metadata where dataset_id = 'bellanwila_attidiya_herps'
+--delete from dashboard_metadata where dataset_id = 'bellanwila_attidiya_mammals'
 insert into dashboard_metadata
 	("class",provider,contact,coverage,dataset_id,date_more,date_range,description,recommended_citation,
 		seasonality,seasonality_more,spatial_metadata,taxon,taxonomy_metadata,url,"type")
 values (
-	'herps', --class - the taxonomic group, like "plants" or "aves".  should match data_registry.taxa
+	'mammals', --class - the taxonomic group, like "plants" or "aves".  should match data_registry.taxa
 	'karunarathna', --provider
 	'dmsameera@gmail.com', --contact - email address of contact
 	'Bellanwila-Attidiya Sanctuary', --coverage - the geographic extent eg. "Global" or "Angola" or "New World"
-	'bellanwila_attidiya_herps', --dataset_id - the name of the species list table
+	'bellanwila_attidiya_mammals', --dataset_id - the name of the species list table
 	null, --  with null if not applicable
 	'ca. 2005 to 2006', --ca. 2005 to 2006 with a string representation for the date range "ca. 1980 to 2010"
 	'Current Status of Faunal Diversity in Bellanwila-Attidiya Sanctuary, Colombo District - Sri Lanka', --description - string description
@@ -138,10 +139,11 @@ values (
 	'none', -- none - null if none
 	null, --  - null if none
 	'WDPA 2010', -- WDPA 2010 - what was used for spatial information
-	'Amphibians and Reptiles', -- Amphibians and Reptiles - same as class but with common names "Plants", or "Birds"
-	'Amphibians: Dutta & Manamendra- Arachchi (1996), Manamendra-Arachchi & Pethiyagoda (2005), Manamendra-Arachchi & Pethiyagoda (2006); Reptiles: Das & de Silva (2005), Deraniyagala (1953; 1955), de Silva (1990), De Silva (1980), Whitaker & Captain (2004)', --taxonomy_metadata: references for the taxonomy
+	'Mammals', -- Mammals - same as class but with common names "Plants", or "Birds"
+	'Mammals: Phillips (1980)', --taxonomy_metadata: references for the taxonomy
 	'http://www.sljol.info/sljol/index.php/TAPRO/article/view/2706/2182', --url - url of the datasource
 
 	-- do not change fields below this line
 	'localinv' --type - localinv. should match data_registry.product_type	
 )
+
